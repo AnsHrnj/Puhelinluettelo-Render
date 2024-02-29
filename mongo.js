@@ -28,12 +28,16 @@ if (process.argv.length === 3) {
         console.log("phonebook:")
         result.forEach(person => {
             console.log(`${person.name} ${person.number}`)
-      })
+        })
       mongoose.connection.close()
     })    
 }
 
-/* person.save().then(result => {
-  console.log('person saved!')
-  mongoose.connection.close()
-}) */
+if (process.argv.length === 5) {
+    person.save()
+    .then(result => {
+      console.log('person added to phonebook!')
+      mongoose.connection.close()
+    })
+}
+
