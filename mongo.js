@@ -22,16 +22,18 @@ const person = new Person({
   number: number,
 })
 
-/* if (process.argv.length === 3) {
-    Person.find({}).then(result => {
-      result.forEach(person => {
-        console.log(person)
+if (process.argv.length === 3) {
+    Person.find({})
+    .then(result => {
+        console.log("phonebook:")
+        result.forEach(person => {
+            console.log(`${person.name} ${person.number}`)
       })
       mongoose.connection.close()
     })    
-} */
+}
 
-person.save().then(result => {
+/* person.save().then(result => {
   console.log('person saved!')
   mongoose.connection.close()
-})
+}) */
