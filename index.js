@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
+const Person = require('./models/person')
 
 let persons = [
     {
@@ -32,7 +34,6 @@ morgan.token('body', request => {
 app.use(express.json())
 app.use(express.static('dist'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
-/* ehkä muuta tästä ylemmästä jotain */
 
 const cors = require('cors')
 
@@ -43,7 +44,9 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -52,8 +55,12 @@ app.get('/api/persons/:id', (request, response) => {
   if (!person) {
     response.status(404).end()
   }
-  response.json(person)
+  Person.findById(request.params.id)
+  .then(person => {
+    response.json(person)
+  })
 })
+/* Tähän id-hakuun korjausta */
 
 app.get('/api/info', (request, response) => {
   response.send(
@@ -69,11 +76,6 @@ app.delete('/api/persons/:id', (request, response) => {
   persons = persons.filter(person => person.id !== id)
   response.status(204).end()
 })
-
-const generateId = (min, max) => {
-  returnedId = Math.floor(Math.random() * (max - min + 1)) + min
-  return returnedId
-}
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
@@ -93,17 +95,17 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  const person = {
-    id: generateId(1, 9999),
+  const person = new Person({
     name: body.name,
     number: body.number    
-  }
+  })
 
   persons = persons.concat(person)
-  response.json(person)
-
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
