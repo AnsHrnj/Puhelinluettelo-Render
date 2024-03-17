@@ -4,28 +4,7 @@ const morgan = require('morgan')
 const app = express()
 const Person = require('./models/person')
 
-let persons = [
-    {
-      id: 1,
-      name: "AH",
-      number: "040"
-    },
-    {
-      id: 2,
-      name: "AL",
-      number: "39"
-    },
-    {
-      id: 3,
-      name: "DA",
-      number: "12"
-    },
-    {
-      id: 4,
-      name: "MP",
-      number: "39"
-    }
-  ]
+let persons = []
 
 morgan.token('body', request => {
   return JSON.stringify(request.body)
@@ -50,17 +29,26 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
+/*   const id = Number(request.params.id)
   const person = persons.find(person => person.id === id)
   if (!person) {
     response.status(404).end()
-  }
+  } */
+  console.log("näkyykö")
   Person.findById(request.params.id)
-  .then(person => {
-    response.json(person)
-  })
+    .then(person => {
+      console.log(person)
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => {
+      console.log(error)
+      response.status(400).send({ error: 'malformatted id' })
+    })
 })
-/* Tähän id-hakuun korjausta */
 
 app.get('/api/info', (request, response) => {
   response.send(
@@ -70,21 +58,23 @@ app.get('/api/info', (request, response) => {
     `
     )
 })
+/* Näyttää yhä vanhan */
 
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
   persons = persons.filter(person => person.id !== id)
   response.status(204).end()
 })
+/* delete päivitys tietokantaversioksi */
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  if (!body.name) {
+  if (body.name === undefined) {
     return response.status(400).json({
       error: 'name missing'
     })  
   }
-  if (!body.number){
+  if (body.number === undefined){
     return response.status(400).json({
       error: 'number missing'
     })
@@ -94,6 +84,7 @@ app.post('/api/persons', (request, response) => {
       error: 'name must be unique'
     })
   }
+  /* Uniikin nimen tarkistus yhä vanha */
 
   const person = new Person({
     name: body.name,
