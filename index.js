@@ -29,12 +29,6 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-/*   const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-  if (!person) {
-    response.status(404).end()
-  } */
-  console.log("näkyykö")
   Person.findById(request.params.id)
     .then(person => {
       console.log(person)
@@ -58,14 +52,14 @@ app.get('/api/info', (request, response) => {
     `
     )
 })
-/* Näyttää yhä vanhan */
+/* Vanha */
 
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
   persons = persons.filter(person => person.id !== id)
   response.status(204).end()
 })
-/* delete päivitys tietokantaversioksi */
+/* Vanha */
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
@@ -84,7 +78,7 @@ app.post('/api/persons', (request, response) => {
       error: 'name must be unique'
     })
   }
-  /* Uniikin nimen tarkistus yhä vanha */
+  /* Nimitarkistus vanha */
 
   const person = new Person({
     name: body.name,
