@@ -4,8 +4,6 @@ const morgan = require('morgan')
 const app = express()
 const Person = require('./models/person')
 
-let persons = []
-
 morgan.token('body', request => {
   return JSON.stringify(request.body)
 })
@@ -45,7 +43,6 @@ app.get('/api/persons', (request, response) => {
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
-      console.log(person)
       if (person) {
         response.json(person)
       } else {
@@ -56,14 +53,16 @@ app.get('/api/persons/:id', (request, response, next) => {
 })
 
 app.get('/api/info', (request, response) => {
-  response.send(
-    `
-    <p>Phonebook has info for ${persons.length} people</p> 
-    <p>${Date()}</p>
-    `
+  Person.find({})
+    .then(persons => 
+      response.send(
+        `
+        <p>Phonebook has info for ${persons.length} people</p>
+        <p>${Date()}</p>
+        `
+      )
     )
 })
-/* Vanha */
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
@@ -80,27 +79,35 @@ app.post('/api/persons', (request, response) => {
       error: 'name missing'
     })  
   }
-  if (body.number === undefined){
+  if (body.number === undefined) {
     return response.status(400).json({
       error: 'number missing'
     })
   }
-  if (persons.some(person => person.name === body.name)) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }
-  /* Nimitarkistus vanha */
 
   const person = new Person({
     name: body.name,
     number: body.number    
   })
 
-  persons = persons.concat(person)
   person.save().then(savedPerson => {
     response.json(savedPerson)
   })
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Person.findOneAndUpdate({ name: person.name }, person, {new: true} )
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
 })
 
 app.use(errorHandler)
